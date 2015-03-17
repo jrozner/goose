@@ -21,7 +21,7 @@ func NewLexer(input io.Reader) *Lexer {
 		tokens: make(chan *Token, 2),
 	}
 
-	go lexer.lolwut()
+	go lexer.run()
 	return lexer
 }
 
@@ -144,7 +144,7 @@ func (l *Lexer) consumeString() {
 	}
 }
 
-func (l *Lexer) lolwut() {
+func (l *Lexer) run() {
 	for {
 		ch, err := l.peek()
 		if err != nil {
