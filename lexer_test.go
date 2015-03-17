@@ -7,7 +7,7 @@ import (
 )
 
 func TestLexer(t *testing.T) {
-	data := `::{,:,:::}:`
+	data := `::{,:,:::}::::::"this is a test":,,,,`
 	lexer := NewLexer(strings.NewReader(data))
 
 	for {

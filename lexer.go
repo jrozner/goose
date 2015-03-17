@@ -111,6 +111,8 @@ func (l *Lexer) consumeString() {
 		return
 	}
 
+	raw = append(raw, ch)
+
 	for {
 		ch, err = l.peek()
 		if err != nil {
@@ -126,8 +128,16 @@ func (l *Lexer) consumeString() {
 				return
 			}
 
+			raw = append(raw, ch)
 			l.emit(start, l.position, String, raw, string(raw))
+			return
 		default:
+			ch, err = l.next()
+			if err != nil {
+				l.emit(start, l.position, Err, raw, err)
+				return
+			}
+
 			raw = append(raw, ch)
 			continue
 		}
