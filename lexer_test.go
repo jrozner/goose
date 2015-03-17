@@ -7,7 +7,7 @@ import (
 )
 
 func TestLexer(t *testing.T) {
-	data := `::{,:,:::}::::::"this is a test":,,,,`
+	data := `::{,:,:::}::::::"this is a test":,,,, add column   datetime `
 	lexer := NewLexer(strings.NewReader(data))
 
 	for {

@@ -2,6 +2,7 @@ package goose
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"unicode"
 )
@@ -78,6 +79,10 @@ func (l *Lexer) skipWhitespace() {
 	for {
 		ch, err := l.peek()
 		if err != nil {
+			if err == io.EOF {
+				l.emit(start, l.position, EOF, []rune{}, err.Error())
+			}
+
 			l.emit(start, l.position, Err, raw, err)
 			return
 		}
@@ -86,15 +91,7 @@ func (l *Lexer) skipWhitespace() {
 			break
 		}
 
-		// this should never actually happen because peek should already have
-		// read from the stream if needed and pushed the next rune into the
-		// buffer which is impossible to result in an error when reading from
-		ch, err = l.next()
-		if err != nil {
-			l.emit(start, l.position, Err, raw, err)
-			return
-		}
-
+		l.next()
 		raw = append(raw, ch)
 	}
 }
@@ -122,22 +119,12 @@ func (l *Lexer) consumeString() {
 
 		switch ch {
 		case '"':
-			ch, err = l.next()
-			if err != nil {
-				l.emit(start, l.position, Err, raw, err)
-				return
-			}
-
+			l.next()
 			raw = append(raw, ch)
 			l.emit(start, l.position, String, raw, string(raw))
 			return
 		default:
-			ch, err = l.next()
-			if err != nil {
-				l.emit(start, l.position, Err, raw, err)
-				return
-			}
-
+			l.next()
 			raw = append(raw, ch)
 			continue
 		}
@@ -146,6 +133,8 @@ func (l *Lexer) consumeString() {
 
 func (l *Lexer) run() {
 	for {
+		l.skipWhitespace()
+
 		ch, err := l.peek()
 		if err != nil {
 			if err == io.EOF {
@@ -159,46 +148,64 @@ func (l *Lexer) run() {
 		switch {
 		case ch == '{':
 			start := l.position
-			ch, err = l.next()
-			if err != nil {
-				l.emit(l.position, l.position, Err, []rune{}, err)
-				return
-			}
+			l.next()
 			l.emit(start, l.position, LeftBrace, []rune{ch}, '{')
 		case ch == '}':
 			start := l.position
-			ch, err = l.next()
-			if err != nil {
-				l.emit(l.position, l.position, Err, []rune{}, err)
-				return
-			}
+			l.next()
 			l.emit(start, l.position, RightBrace, []rune{ch}, '}')
 		case ch == ',':
 			start := l.position
-			ch, err = l.next()
-			if err != nil {
-				l.emit(l.position, l.position, Err, []rune{}, err)
-				return
-			}
+			l.next()
 			l.emit(start, l.position, Comma, []rune{ch}, ',')
 		case ch == ':':
 			start := l.position
-			ch, err = l.next()
-			if err != nil {
-				l.emit(l.position, l.position, Err, []rune{}, err)
-				return
-			}
+			l.next()
 			l.emit(start, l.position, Colon, []rune{ch}, ':')
 		case ch == '"':
 			l.consumeString()
 		case unicode.IsLetter(ch):
-			//l.consumeKeyword()
+			l.consumeKeyword()
 		case unicode.IsNumber(ch), ch == '-':
 			//l.consumeNumber()
 		}
 	}
 
 	close(l.tokens)
+}
+
+func (l *Lexer) consumeKeyword() {
+	var (
+		start int
+		raw   = make([]rune, 0)
+	)
+
+	for {
+		ch, err := l.peek()
+		if err != nil {
+			if err == io.EOF {
+				l.emit(l.position, l.position, EOF, []rune{}, err.Error())
+				break
+			}
+
+			l.emit(l.position, l.position, Err, []rune{}, err.Error())
+			return
+		}
+
+		switch {
+		case unicode.IsLower(ch), ch == '_':
+			l.next()
+			raw = append(raw, ch)
+		default:
+			if token, ok := keywords[string(raw)]; ok {
+				l.emit(start, l.position, token, raw, string(raw))
+				return
+			}
+
+			l.emit(start, l.position, Err, raw, fmt.Errorf("unexpected %s", string(raw)))
+			return
+		}
+	}
 }
 
 func (l *Lexer) Next() *Token {
