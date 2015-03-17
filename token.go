@@ -5,9 +5,9 @@ import "fmt"
 type Token struct {
 	Start int
 	Stop  int
+	Type  TokenType
 	Raw   []rune
 	Value interface{}
-	Type  TokenType
 }
 
 func (t *Token) String() string {
@@ -18,10 +18,8 @@ func (t *Token) String() string {
 		}
 
 		return "error value is not an error"
-	case EOF:
-		return "EOF"
 	default:
-		return fmt.Sprintf("%q", t.Value)
+		return fmt.Sprintf("[%d,%d) %d %q", t.Start, t.Stop, t.Type, t.Value)
 	}
 }
 

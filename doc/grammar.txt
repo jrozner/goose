@@ -1,0 +1,37 @@
+root ::= <up statement> <down statement> EOF
+
+up statement ::= 'up' [<statement>...] 'end'
+down statement ::= 'down' [<statement>...] 'end'
+
+statement ::= <add column> | <change column> | <create table> | <raw> | <rename column> | <rename table> | <remove column> | <remove index> | <remove table>
+
+create table ::= 'create' 'table' <table name> [<column definition>...] 'end'
+add column ::= 'add' 'column' <table name> ',' <data type> [',' <options block>]
+add index ::= 'add' 'index' (<table name> ',' <column name> | <table name>) [',' <index options block>]
+change column ::= 'change' 'column' <table name> ',' <column name> ',' <data type>
+raw ::= 'raw' <raw body> 'end'
+raname column ::= 'rename' 'column' <table name> ',' <column name> ',' <new name>
+rename table ::= 'rename' 'table' <table name> ',' <new name>
+remove column ::= 'remove' 'column' <table name> ',' <column name>
+remove table ::= 'remove' 'table' <table name>
+remove index ::= 'remove' 'index' (<table name> ',' <column name> | <table name>)
+
+column definition ::= <data type> <column name> [',' <options block] | 'timestamps'
+data type ::= 'binary' | 'boolean' | 'date' | 'datetime' | 'decimal' | 'float' | 'integer' | 'primary_key' | 'references' | 'string' | 'text' | 'time' | 'timestamp'
+options block ::= '{' <option> [',' <option>...] '}'
+option ::= 'default' ':' <default value> | 'null' ':' <boolean> | 'size' ':' <integer> | 'precision' ':' <integer> | 'scale' ':' <integer>
+default value ::= <boolean> | <float> | <integer> | 'null' | <string>
+boolean ::= 'true' | 'false'
+
+raw body ::= <string>
+
+index options block ::= '{' <index option> [',' <index option>...] '}'
+index options ::= 'name' ':' <string> | 'unique' ':' <boolean> | 'order' ':' '{' <string> ':' ('asc' | 'desc') '}'
+
+table name ::= <string>
+column name ::= <string>
+new name ::= <string>
+
+string ::= '"' \u0...\uffffffff '"'
+float ::= '-'? {'0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'} ('.' | 'e' | 'E') {'0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'}
+integer ::= '-'? {'0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'}

@@ -1,0 +1,29 @@
+up
+	create table "users"
+		string "username", {null: false, default: "jrozner"}
+		string "password"
+		timestamps
+	end
+
+	create table "posts"
+		string "title"
+		text "body"
+		timestamps
+	end
+
+	change column "users", "username", integer
+	rename table "posts", "user_posts"
+	rename column "users", "username", "name"
+	raw
+		"create table users (id integer, primary_key id)
+	end
+	remove column "users", "username"
+	remove table "users"
+	add index "users", "username", {name: "users_username_idx", unique: true, order: {"username": asc}}
+	add index "users"
+end
+
+down
+	remove table "users"
+	remove table "posts"
+end
