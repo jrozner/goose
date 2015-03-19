@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strconv"
 	"unicode"
 )
 
@@ -168,13 +169,79 @@ func (l *Lexer) run() {
 		case unicode.IsLetter(ch):
 			l.consumeKeyword()
 		case unicode.IsNumber(ch), ch == '-':
-			//l.consumeNumber()
+			l.consumeNumber()
 		default:
 			l.emit(l.position, l.position, Err, []rune{ch}, errors.New("unexpected input"))
 		}
 	}
 
 	close(l.tokens)
+}
+
+func (l *Lexer) consumeNumber() {
+	var (
+		start      = l.position
+		raw        = make([]rune, 0)
+		isFloat    bool
+		isNegative bool
+	)
+
+	for {
+		ch, err := l.peek()
+		if err != nil {
+			if err == io.EOF {
+				l.emit(start, l.position, EOF, []rune{}, err.Error())
+				break
+			}
+
+			l.emit(start, l.position, Err, []rune{}, err.Error())
+			return
+		}
+
+		switch {
+		case ch == '-':
+			if isNegative == true {
+				l.emit(start, l.position, Err, raw, errors.New("unexpected input"))
+				return
+			}
+
+			isNegative = true
+			l.next()
+			raw = append(raw, ch)
+		case unicode.IsNumber(ch):
+			l.next()
+			raw = append(raw, ch)
+		case ch == 'e', ch == 'E', ch == '.':
+			if isFloat == true {
+				l.emit(start, l.position, Err, raw, errors.New("unexpected input"))
+				return
+			}
+
+			isFloat = true
+			l.next()
+			raw = append(raw, ch)
+		default:
+			if isFloat {
+				num, err := strconv.ParseFloat(string(raw), 64)
+				if err != nil {
+					l.emit(start, l.position, Err, raw, err)
+					return
+				}
+
+				l.emit(start, l.position, FloatLiteral, raw, num)
+			} else {
+				num, err := strconv.ParseInt(string(raw), 10, 64)
+				if err != nil {
+					l.emit(start, l.position, Err, raw, err)
+					return
+				}
+
+				l.emit(start, l.position, IntegerLiteral, raw, num)
+			}
+
+			return
+		}
+	}
 }
 
 func (l *Lexer) consumeKeyword() {

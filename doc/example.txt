@@ -1,6 +1,7 @@
 up
 	create table "users"
 		string "username", {null: false, default: "jrozner"}
+		integer "thing", {default: 4e2}
 		string "password"
 		timestamps
 	end
