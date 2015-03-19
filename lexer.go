@@ -176,7 +176,7 @@ func (l *Lexer) run() {
 
 func (l *Lexer) consumeKeyword() {
 	var (
-		start int
+		start = l.position
 		raw   = make([]rune, 0)
 	)
 
