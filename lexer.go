@@ -2,6 +2,7 @@ package goose
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
 	"unicode"
@@ -168,6 +169,8 @@ func (l *Lexer) run() {
 			l.consumeKeyword()
 		case unicode.IsNumber(ch), ch == '-':
 			//l.consumeNumber()
+		default:
+			l.emit(l.position, l.position, Err, []rune{ch}, errors.New("unexpected input"))
 		}
 	}
 
