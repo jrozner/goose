@@ -2,13 +2,17 @@ package goose
 
 import (
 	"fmt"
-	"strings"
+	"os"
 	"testing"
 )
 
 func TestLexer(t *testing.T) {
-	data := `::{,:,:::}::::::"this is a test":,,,, add column   datetime `
-	lexer := NewLexer(strings.NewReader(data))
+	file, err := os.Open("doc/example.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	lexer := NewLexer(file)
 
 	for {
 		tok := lexer.Next()
