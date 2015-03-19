@@ -82,10 +82,10 @@ func (l *Lexer) skipWhitespace() {
 		ch, err := l.peek()
 		if err != nil {
 			if err == io.EOF {
-				l.emit(start, l.position, EOF, []rune{}, err.Error())
+				l.emit(start, l.position, TokenEOF, []rune{}, err.Error())
 			}
 
-			l.emit(start, l.position, Err, raw, err)
+			l.emit(start, l.position, TokenErr, raw, err)
 			return
 		}
 
@@ -106,7 +106,7 @@ func (l *Lexer) consumeString() {
 
 	ch, err := l.next()
 	if err != nil {
-		l.emit(start, l.position, Err, raw, err)
+		l.emit(start, l.position, TokenErr, raw, err)
 		return
 	}
 
@@ -115,7 +115,7 @@ func (l *Lexer) consumeString() {
 	for {
 		ch, err = l.peek()
 		if err != nil {
-			l.emit(start, l.position, Err, raw, err)
+			l.emit(start, l.position, TokenErr, raw, err)
 			return
 		}
 
@@ -123,7 +123,7 @@ func (l *Lexer) consumeString() {
 		case '"':
 			l.next()
 			raw = append(raw, ch)
-			l.emit(start, l.position, String, raw, string(raw))
+			l.emit(start, l.position, TokenString, raw, string(raw))
 			return
 		default:
 			l.next()
@@ -140,30 +140,30 @@ func (l *Lexer) run() {
 		ch, err := l.peek()
 		if err != nil {
 			if err == io.EOF {
-				l.emit(l.position, l.position, EOF, []rune{}, err.Error())
+				l.emit(l.position, l.position, TokenEOF, []rune{}, err.Error())
 				break
 			}
 
-			l.emit(l.position, l.position, Err, []rune{}, err.Error())
+			l.emit(l.position, l.position, TokenErr, []rune{}, err.Error())
 		}
 
 		switch {
 		case ch == '{':
 			start := l.position
 			l.next()
-			l.emit(start, l.position, LeftBrace, []rune{ch}, '{')
+			l.emit(start, l.position, TokenLeftBrace, []rune{ch}, '{')
 		case ch == '}':
 			start := l.position
 			l.next()
-			l.emit(start, l.position, RightBrace, []rune{ch}, '}')
+			l.emit(start, l.position, TokenRightBrace, []rune{ch}, '}')
 		case ch == ',':
 			start := l.position
 			l.next()
-			l.emit(start, l.position, Comma, []rune{ch}, ',')
+			l.emit(start, l.position, TokenComma, []rune{ch}, ',')
 		case ch == ':':
 			start := l.position
 			l.next()
-			l.emit(start, l.position, Colon, []rune{ch}, ':')
+			l.emit(start, l.position, TokenColon, []rune{ch}, ':')
 		case ch == '"':
 			l.consumeString()
 		case unicode.IsLetter(ch):
@@ -171,7 +171,7 @@ func (l *Lexer) run() {
 		case unicode.IsNumber(ch), ch == '-':
 			l.consumeNumber()
 		default:
-			l.emit(l.position, l.position, Err, []rune{ch}, errors.New("unexpected input"))
+			l.emit(l.position, l.position, TokenErr, []rune{ch}, errors.New("unexpected input"))
 		}
 	}
 
@@ -190,18 +190,18 @@ func (l *Lexer) consumeNumber() {
 		ch, err := l.peek()
 		if err != nil {
 			if err == io.EOF {
-				l.emit(start, l.position, EOF, []rune{}, err.Error())
+				l.emit(start, l.position, TokenEOF, []rune{}, err.Error())
 				break
 			}
 
-			l.emit(start, l.position, Err, []rune{}, err.Error())
+			l.emit(start, l.position, TokenErr, []rune{}, err.Error())
 			return
 		}
 
 		switch {
 		case ch == '-':
 			if isNegative == true {
-				l.emit(start, l.position, Err, raw, errors.New("unexpected input"))
+				l.emit(start, l.position, TokenErr, raw, errors.New("unexpected input"))
 				return
 			}
 
@@ -213,7 +213,7 @@ func (l *Lexer) consumeNumber() {
 			raw = append(raw, ch)
 		case ch == 'e', ch == 'E', ch == '.':
 			if isFloat == true {
-				l.emit(start, l.position, Err, raw, errors.New("unexpected input"))
+				l.emit(start, l.position, TokenErr, raw, errors.New("unexpected input"))
 				return
 			}
 
@@ -224,19 +224,19 @@ func (l *Lexer) consumeNumber() {
 			if isFloat {
 				num, err := strconv.ParseFloat(string(raw), 64)
 				if err != nil {
-					l.emit(start, l.position, Err, raw, err)
+					l.emit(start, l.position, TokenErr, raw, err)
 					return
 				}
 
-				l.emit(start, l.position, FloatLiteral, raw, num)
+				l.emit(start, l.position, TokenFloatLiteral, raw, num)
 			} else {
 				num, err := strconv.ParseInt(string(raw), 10, 64)
 				if err != nil {
-					l.emit(start, l.position, Err, raw, err)
+					l.emit(start, l.position, TokenErr, raw, err)
 					return
 				}
 
-				l.emit(start, l.position, IntegerLiteral, raw, num)
+				l.emit(start, l.position, TokenIntegerLiteral, raw, num)
 			}
 
 			return
@@ -254,11 +254,11 @@ func (l *Lexer) consumeKeyword() {
 		ch, err := l.peek()
 		if err != nil {
 			if err == io.EOF {
-				l.emit(l.position, l.position, EOF, []rune{}, err.Error())
+				l.emit(l.position, l.position, TokenEOF, []rune{}, err.Error())
 				break
 			}
 
-			l.emit(l.position, l.position, Err, []rune{}, err.Error())
+			l.emit(l.position, l.position, TokenErr, []rune{}, err.Error())
 			return
 		}
 
@@ -272,7 +272,7 @@ func (l *Lexer) consumeKeyword() {
 				return
 			}
 
-			l.emit(start, l.position, Err, raw, fmt.Errorf("unexpected %s", string(raw)))
+			l.emit(start, l.position, TokenErr, raw, fmt.Errorf("unexpected %s", string(raw)))
 			return
 		}
 	}

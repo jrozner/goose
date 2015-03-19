@@ -18,7 +18,7 @@ func TestLexer(t *testing.T) {
 		tok := lexer.Next()
 		fmt.Println(tok.String())
 
-		if tok.Type == EOF || tok.Type == Err {
+		if tok.Type == TokenEOF || tok.Type == TokenErr {
 			break
 		}
 	}

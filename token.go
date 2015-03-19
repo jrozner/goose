@@ -12,7 +12,7 @@ type Token struct {
 
 func (t *Token) String() string {
 	switch t.Type {
-	case Err:
+	case TokenErr:
 		if asserted, ok := t.Value.(error); ok {
 			return asserted.Error()
 		}
@@ -23,96 +23,96 @@ func (t *Token) String() string {
 	}
 }
 
-type TokenType int
+type TokenType uint
 
 var keywords = map[string]TokenType{
-	"add":         Add,
-	"asc":         Asc,
-	"binary":      Binary,
-	"boolean":     Boolean,
-	"change":      Change,
-	"column":      Column,
-	"create":      Create,
-	"date":        Date,
-	"datetime":    Datetime,
-	"decimal":     Decimal,
-	"default":     Default,
-	"desc":        Desc,
-	"down":        Down,
-	"end":         End,
-	"false":       False,
-	"float":       Float,
-	"index":       Index,
-	"integer":     Integer,
-	"name":        Name,
-	"null":        Null,
-	"order":       Order,
-	"precision":   Precision,
-	"primary_key": PrimaryKey,
-	"raw":         Raw,
-	"references":  References,
-	"remove":      Remove,
-	"rename":      Rename,
-	"scale":       Scale,
-	"size":        Size,
-	"string":      String,
-	"table":       Table,
-	"text":        Text,
-	"time":        Time,
-	"timestamp":   Timestamp,
-	"timestamps":  Timestamps,
-	"true":        True,
-	"unique":      Unique,
-	"up":          Up,
+	"add":         TokenAdd,
+	"asc":         TokenAsc,
+	"binary":      TokenBinary,
+	"boolean":     TokenBoolean,
+	"change":      TokenChange,
+	"column":      TokenColumn,
+	"create":      TokenCreate,
+	"date":        TokenDate,
+	"datetime":    TokenDatetime,
+	"decimal":     TokenDecimal,
+	"default":     TokenDefault,
+	"desc":        TokenDesc,
+	"down":        TokenDown,
+	"end":         TokenEnd,
+	"false":       TokenFalse,
+	"float":       TokenFloat,
+	"index":       TokenIndex,
+	"integer":     TokenInteger,
+	"name":        TokenName,
+	"null":        TokenNull,
+	"order":       TokenOrder,
+	"precision":   TokenPrecision,
+	"primary_key": TokenPrimaryKey,
+	"raw":         TokenRaw,
+	"references":  TokenReferences,
+	"remove":      TokenRemove,
+	"rename":      TokenRename,
+	"scale":       TokenScale,
+	"size":        TokenSize,
+	"string":      TokenString,
+	"table":       TokenTable,
+	"text":        TokenText,
+	"time":        TokenTime,
+	"timestamp":   TokenTimestamp,
+	"timestamps":  TokenTimestamps,
+	"true":        TokenTrue,
+	"unique":      TokenUnique,
+	"up":          TokenUp,
 }
 
 const (
-	Err TokenType = iota
-	EOF
+	TokenErr TokenType = iota
+	TokenEOF
 
-	Add
-	Asc
-	Binary
-	Boolean
-	Change
-	Colon
-	Column
-	Comma
-	Create
-	Date
-	Datetime
-	Decimal
-	Default
-	Desc
-	Down
-	End
-	False
-	Float
-	FloatLiteral
-	Index
-	Integer
-	IntegerLiteral
-	LeftBrace
-	Name
-	Null
-	Order
-	Precision
-	PrimaryKey
-	Raw
-	References
-	Remove
-	Rename
-	RightBrace
-	Scale
-	Size
-	String
-	StringLiteral
-	Table
-	Text
-	Time
-	Timestamp
-	Timestamps
-	True
-	Unique
-	Up
+	TokenAdd
+	TokenAsc
+	TokenBinary
+	TokenBoolean
+	TokenChange
+	TokenColon
+	TokenColumn
+	TokenComma
+	TokenCreate
+	TokenDate
+	TokenDatetime
+	TokenDecimal
+	TokenDefault
+	TokenDesc
+	TokenDown
+	TokenEnd
+	TokenFalse
+	TokenFloat
+	TokenFloatLiteral
+	TokenIndex
+	TokenInteger
+	TokenIntegerLiteral
+	TokenLeftBrace
+	TokenName
+	TokenNull
+	TokenOrder
+	TokenPrecision
+	TokenPrimaryKey
+	TokenRaw
+	TokenReferences
+	TokenRemove
+	TokenRename
+	TokenRightBrace
+	TokenScale
+	TokenSize
+	TokenString
+	TokenStringLiteral
+	TokenTable
+	TokenText
+	TokenTime
+	TokenTimestamp
+	TokenTimestamps
+	TokenTrue
+	TokenUnique
+	TokenUp
 )
