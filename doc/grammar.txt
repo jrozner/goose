@@ -3,7 +3,7 @@ root = <up statement> <down statement> EOF ;
 up statement = 'up' ([<statement>] | {<statement>}) 'end' ;
 down statement = 'down' ([<statement>] | {<statement>}) 'end' ;
 
-statement = <add column> | <change column> | <create table> | <raw> | <rename column> | <rename table> | <remove column> | <remove index> | <remove table> ;
+statement = <add column> | <add index> | <change column> | <create table> | <raw> | <rename column> | <rename table> | <remove column> | <remove index> | <remove table> ;
 
 create table = 'create' 'table' <table name> ([<column definition>] | {<column definition>} 'end' ;
 add column = 'add' 'column' <table name> ',' <data type> [',' <options block>] ;
