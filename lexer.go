@@ -123,7 +123,7 @@ func (l *Lexer) consumeString() {
 		case '"':
 			l.next()
 			raw = append(raw, ch)
-			l.emit(start, l.position, TokenString, raw, string(raw))
+			l.emit(start, l.position, TokenStringLiteral, raw, string(raw))
 			return
 		default:
 			l.next()
