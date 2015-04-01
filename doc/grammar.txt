@@ -6,7 +6,7 @@ down statement = 'down' ([<statement>] | {<statement>}) 'end' ;
 statement = <add column> | <add index> | <change column> | <create table> | <raw> | <rename column> | <rename table> | <remove column> | <remove index> | <remove table> ;
 
 add column = 'add' 'column' <table name> ',' <data type> [',' <options block>] ;
-add index = 'add' 'index' (<table name> ',' <column name> | <table name>) [',' <index options block>] ;
+add index = 'add' 'index' <table name> ',' <column name> [',' <index options block>] ;
 change column = 'change' 'column' <table name> ',' <column name> ',' <data type> ;
 create table = 'create' 'table' <table name> ([<column definition>] | {<column definition>} 'end' ;
 raw = 'raw' <raw body> 'end' ;
