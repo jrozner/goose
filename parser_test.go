@@ -18,7 +18,8 @@ func TestParser(t *testing.T) {
 
 	tree, err := Parse(lexer)
 	if err != nil {
-		t.Fail()
+		t.Error(err)
+		t.FailNow()
 	}
 
 	walk(tree, 0)

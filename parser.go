@@ -1,9 +1,6 @@
 package goose
 
-import (
-	"errors"
-	"log"
-)
+import "errors"
 
 var ErrNoMatch = errors.New("no match")
 
@@ -35,9 +32,13 @@ func (p *parser) backup(node *Node) {
 		case *Node:
 			p.backup(asserted)
 		default:
-			log.Println("wtf is going on here")
+			panic("unknown type encountered")
 		}
 	}
+}
+
+func (p *parser) backupToken(token *Token) {
+	p.tokens = append([]*Token{token}, p.tokens...)
 }
 
 func (p *parser) parseRoot() (*Node, error) {
@@ -136,7 +137,7 @@ func (p *parser) parseStatement() (*Node, error) {
 		return node, nil
 	}
 
-	return nil, ErrNoMatch
+	return node, ErrNoMatch
 }
 
 func (p *parser) parseAddColumn() (*Node, error) {
@@ -147,7 +148,7 @@ func (p *parser) parseAddColumn() (*Node, error) {
 
 	if token.Type != TokenAdd {
 		p.backup(node)
-		return nil, ErrNoMatch
+		return node, ErrNoMatch
 	}
 
 	token = p.next()
@@ -155,22 +156,33 @@ func (p *parser) parseAddColumn() (*Node, error) {
 
 	if token.Type != TokenColumn {
 		p.backup(node)
-		return nil, ErrNoMatch
+		return node, ErrNoMatch
 	}
 
 	tableName, err := p.parseTableName()
 	if err != nil {
 		p.backup(node)
-		return nil, ErrNoMatch
+		return node, ErrNoMatch
 	}
 
 	node.Children = append(node.Children, tableName)
 
+	// Not matching a comma here isn't a parse failure. It just means there's no
+	// options block specified
 	token = p.next()
-	node.Children = append(node.Children, token)
 	if token.Type != TokenComma {
+		p.backupToken(token)
+		return node, nil
+	}
+
+	node.Children = append(node.Children, token)
+
+	optionsBlock, err := p.parseOptionsBlock()
+	node.Children = append(node.Children, optionsBlock)
+
+	if err != nil {
 		p.backup(node)
-		return nil, ErrNoMatch
+		return node, ErrNoMatch
 	}
 
 	return node, nil
@@ -188,4 +200,8 @@ func (p *parser) parseTableName() (*Node, error) {
 	}
 
 	return node, nil
+}
+
+func (p *parser) parseOptionsBlock() (*Node, error) {
+	return &Node{}, ErrNoMatch
 }
