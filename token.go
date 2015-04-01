@@ -18,8 +18,39 @@ func (t *Token) String() string {
 		}
 
 		return "error value is not an error"
+	case TokenComma:
+		fallthrough
+	case TokenColon:
+		fallthrough
+	case TokenLeftBrace:
+		fallthrough
+	case TokenRightBrace:
+		if asserted, ok := t.Value.(rune); ok {
+			return fmt.Sprintf("%s", string(asserted))
+		}
+
+		return "error asserting value"
+	case TokenStringLiteral:
+		if asserted, ok := t.Value.(string); ok {
+			runes := []rune(asserted)
+			return fmt.Sprintf("%s", string(runes[1:len(asserted)-1]))
+		}
+
+		return "error asserting value"
+	case TokenFloatLiteral:
+		if asserted, ok := t.Value.(float64); ok {
+			return fmt.Sprintf("%.02f", asserted)
+		}
+
+		return "error asserting value"
+	case TokenIntegerLiteral:
+		if asserted, ok := t.Value.(int64); ok {
+			return fmt.Sprintf("%d", asserted)
+		}
+
+		return "error asserting value"
 	default:
-		return fmt.Sprintf("[%d,%d) %d %q", t.Start, t.Stop, t.Type, t.Value)
+		return fmt.Sprintf("%q", t.Value)
 	}
 }
 

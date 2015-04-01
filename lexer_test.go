@@ -16,7 +16,7 @@ func TestLexer(t *testing.T) {
 
 	for {
 		tok := lexer.Next()
-		fmt.Println(tok.String())
+		fmt.Printf("[%d,%d) %d %s\n", tok.Start, tok.Stop, tok.Type, tok.String())
 
 		if tok.Type == TokenEOF || tok.Type == TokenErr {
 			break
