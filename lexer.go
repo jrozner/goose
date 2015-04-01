@@ -252,12 +252,7 @@ func (l *Lexer) consumeKeyword() {
 
 	for {
 		ch, err := l.peek()
-		if err != nil {
-			if err == io.EOF {
-				l.emit(l.position, l.position, TokenEOF, []rune{}, err.Error())
-				break
-			}
-
+		if err != nil && err != io.EOF {
 			l.emit(l.position, l.position, TokenErr, []rune{}, err.Error())
 			return
 		}
