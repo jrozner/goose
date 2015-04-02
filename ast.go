@@ -18,9 +18,12 @@ var Nodes = map[NodeType]string{
 	NodeDataType:          "DataType",
 	NodeDefaultValue:      "DefaultValue",
 	NodeDownStatement:     "DownStatement",
+	NodeFloat:             "Float",
 	NodeIndexOptions:      "IndexOptions",
 	NodeIndexOptionsBlock: "IndexOptionsBlock",
+	NodeInteger:           "Integer",
 	NodeNewName:           "NewName",
+	NodeNull:              "Null",
 	NodeOption:            "Option",
 	NodeOptionsBlock:      "OptionsBlock",
 	NodeRanameColumn:      "RenameColumn",
@@ -32,6 +35,7 @@ var Nodes = map[NodeType]string{
 	NodeRenameTable:       "RenameTable",
 	NodeRoot:              "Root",
 	NodeStatement:         "Statement",
+	NodeString:            "String",
 	NodeTableName:         "TableName",
 	NodeUpStatement:       "UpStatement",
 }
@@ -47,9 +51,12 @@ const (
 	NodeDataType
 	NodeDefaultValue
 	NodeDownStatement
+	NodeFloat
 	NodeIndexOptions
 	NodeIndexOptionsBlock
+	NodeInteger
 	NodeNewName
+	NodeNull
 	NodeOption
 	NodeOptionsBlock
 	NodeRanameColumn
@@ -61,6 +68,7 @@ const (
 	NodeRenameTable
 	NodeRoot
 	NodeStatement
+	NodeString
 	NodeTableName
 	NodeUpStatement
 )
