@@ -13,7 +13,7 @@ func TestParser(t *testing.T) {
 			t.Fatal(err)
 		}*/
 
-	input := `up add column "users", end down add column "users", end`
+	input := `up add column "users", string, {size: 5, null:true} add column "password", text end down add column "users", boolean end`
 	lexer := NewLexer(strings.NewReader(input))
 
 	tree, err := Parse(lexer)

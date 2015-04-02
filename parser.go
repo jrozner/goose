@@ -167,6 +167,22 @@ func (p *parser) parseAddColumn() (*Node, error) {
 
 	node.Children = append(node.Children, tableName)
 
+	token = p.next()
+	node.Children = append(node.Children, token)
+
+	if token.Type != TokenComma {
+		p.backup(node)
+		return node, ErrNoMatch
+	}
+
+	dataType, err := p.parseDataType()
+	node.Children = append(node.Children, dataType)
+
+	if err != nil {
+		p.backup(node)
+		return node, ErrNoMatch
+	}
+
 	// Not matching a comma here isn't a parse failure. It just means there's no
 	// options block specified
 	token = p.next()
@@ -196,12 +212,293 @@ func (p *parser) parseTableName() (*Node, error) {
 
 	if token.Type != TokenStringLiteral {
 		p.backup(node)
-		return nil, ErrNoMatch
+		return node, ErrNoMatch
 	}
 
 	return node, nil
 }
 
 func (p *parser) parseOptionsBlock() (*Node, error) {
-	return &Node{}, ErrNoMatch
+	node := &Node{Type: NodeOptionsBlock}
+
+	token := p.next()
+	node.Children = append(node.Children, token)
+
+	if token.Type != TokenLeftBrace {
+		p.backup(node)
+		return node, ErrNoMatch
+	}
+
+	option, err := p.parseOption()
+	node.Children = append(node.Children, option)
+
+	if err != nil {
+		return node, ErrNoMatch
+	}
+
+	for {
+		token = p.next()
+		if token.Type != TokenComma {
+			p.backupToken(token)
+			break
+		}
+
+		node.Children = append(node.Children, token)
+
+		option, err = p.parseOption()
+		node.Children = append(node.Children, option)
+
+		if err != nil {
+			p.backup(node)
+			return node, ErrNoMatch
+		}
+	}
+
+	token = p.next()
+	node.Children = append(node.Children, token)
+
+	if token.Type != TokenRightBrace {
+		p.backup(node)
+		return node, ErrNoMatch
+	}
+
+	return node, nil
+}
+
+func (p *parser) parseOption() (*Node, error) {
+	node := &Node{Type: NodeOption}
+
+	// default
+	token := p.next()
+	if token.Type == TokenDefault {
+		node.Children = append(node.Children, token)
+
+		token = p.next()
+		node.Children = append(node.Children, token)
+
+		if token.Type != TokenColon {
+			p.backup(node)
+			return node, ErrNoMatch
+		}
+
+		defaultValue, err := p.parseDefaultValue()
+		node.Children = append(node.Children, defaultValue)
+
+		if err != nil {
+			p.backup(node)
+			return node, ErrNoMatch
+		}
+
+		if defaultValue.Type != NodeDefaultValue {
+			p.backup(node)
+			return node, ErrNoMatch
+		}
+
+		return node, nil
+	} else {
+		p.backupToken(token)
+	}
+
+	// null
+	token = p.next()
+	if token.Type == TokenNull {
+		node.Children = append(node.Children, token)
+
+		token = p.next()
+		node.Children = append(node.Children, token)
+
+		if token.Type != TokenColon {
+			p.backup(node)
+			return node, ErrNoMatch
+		}
+
+		boolean, err := p.parseBoolean()
+		node.Children = append(node.Children, boolean)
+
+		if err != nil {
+			p.backup(node)
+			return node, ErrNoMatch
+		}
+
+		if boolean.Type != NodeBoolean {
+			p.backup(node)
+			return node, ErrNoMatch
+		}
+
+		return node, nil
+	} else {
+		p.backupToken(token)
+	}
+
+	// size
+	token = p.next()
+	if token.Type == TokenSize {
+		node.Children = append(node.Children, token)
+
+		token = p.next()
+		node.Children = append(node.Children, token)
+
+		if token.Type != TokenColon {
+			p.backup(node)
+			return node, ErrNoMatch
+		}
+
+		integer, err := p.parseInteger()
+		node.Children = append(node.Children, integer)
+
+		if err != nil {
+			p.backup(node)
+			return node, ErrNoMatch
+		}
+
+		if integer.Type != NodeInteger {
+			p.backup(node)
+			return node, ErrNoMatch
+		}
+
+		return node, nil
+	} else {
+		p.backupToken(token)
+	}
+
+	// precision
+	token = p.next()
+	if token.Type == TokenPrecision {
+		node.Children = append(node.Children, token)
+
+		token = p.next()
+		node.Children = append(node.Children, token)
+
+		if token.Type != TokenColon {
+			p.backup(node)
+			return node, ErrNoMatch
+		}
+
+		integer, err := p.parseInteger()
+		node.Children = append(node.Children, integer)
+
+		if err != nil {
+			p.backup(node)
+			return node, ErrNoMatch
+		}
+
+		if integer.Type != NodeInteger {
+			p.backup(node)
+			return node, ErrNoMatch
+		}
+
+		return node, nil
+	} else {
+		p.backupToken(token)
+	}
+
+	// scale
+	token = p.next()
+	if token.Type == TokenScale {
+		node.Children = append(node.Children, token)
+
+		token = p.next()
+		node.Children = append(node.Children, token)
+
+		if token.Type != TokenColon {
+			p.backup(node)
+			return node, ErrNoMatch
+		}
+
+		integer, err := p.parseInteger()
+		node.Children = append(node.Children, integer)
+
+		if err != nil {
+			p.backup(node)
+			return node, ErrNoMatch
+		}
+
+		if integer.Type != NodeInteger {
+			p.backup(node)
+			return node, ErrNoMatch
+		}
+
+		return node, nil
+	} else {
+		p.backupToken(token)
+	}
+
+	// We made it to the end and none of the options matched
+	return node, ErrNoMatch
+}
+
+func (p *parser) parseDataType() (*Node, error) {
+	node := &Node{Type: NodeDataType}
+
+	token := p.next()
+
+	switch token.Type {
+	case TokenBinary, TokenBoolean, TokenDate, TokenDatetime, TokenDecimal, TokenFloat, TokenInteger, TokenPrimaryKey, TokenReferences, TokenString, TokenText, TokenTime, TokenTimestamp:
+		node.Children = append(node.Children, token)
+		return node, nil
+	default:
+		p.backupToken(token)
+		return node, ErrNoMatch
+	}
+
+	panic("unknown type encountered")
+}
+
+func (p *parser) parseDefaultValue() (*Node, error) {
+	node := &Node{Type: NodeDefaultValue}
+
+	token := p.next()
+
+	switch token.Type {
+	case TokenTrue, TokenFalse, TokenFloatLiteral, TokenIntegerLiteral, TokenNull, TokenString:
+		node.Children = append(node.Children, token)
+		return node, nil
+	default:
+		p.backupToken(token)
+		return node, ErrNoMatch
+	}
+
+	panic("unknown type encountered")
+}
+
+func (p *parser) parseBoolean() (*Node, error) {
+	node := &Node{Type: NodeBoolean}
+
+	token := p.next()
+	node.Children = append(node.Children, token)
+
+	if token.Type != TokenTrue && token.Type != TokenFalse {
+		p.backup(node)
+		return node, ErrNoMatch
+	}
+
+	return node, nil
+}
+
+func (p *parser) parseFloat() (*Node, error) {
+	node := &Node{Type: NodeFloat}
+
+	token := p.next()
+	node.Children = append(node.Children, token)
+
+	if token.Type != TokenFloatLiteral {
+		p.backup(node)
+		return node, ErrNoMatch
+	}
+
+	return node, nil
+}
+
+func (p *parser) parseInteger() (*Node, error) {
+	node := &Node{Type: NodeInteger}
+
+	token := p.next()
+	node.Children = append(node.Children, token)
+
+	if token.Type != TokenIntegerLiteral {
+		p.backup(node)
+		return node, ErrNoMatch
+	}
+
+	return node, nil
 }
